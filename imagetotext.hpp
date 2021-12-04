@@ -3,37 +3,39 @@
 using namespace cv;
 using namespace std;
 
+struct ConfigParams {
+  double minTextFillRate = 0.4;
+  double maxTextFillRate = 0.9;
+  int minLetterHeight = 8;
+  int minLetterWidth = 8;
+  double minThresh = 100.0;
+  double maxThresh = 200.0;
+  int apertureSize = 3;
+  bool L2Gradient = true;
+};
+
 struct QLetter {
   Mat letter;
   Rect rect;
 };
 
+struct QWord {
+  QWord(Rect _rect): rect(_rect) {}
+  Rect rect;
+  vector<QLetter> letters;
+};
 
 class QImageToText {
 private:
-  Mat image;
-  Mat gray;
-  vector<QLetter> words;
+  ConfigParams m_config;
+  Mat m_image;
+  Mat m_gray;
+  vector<QWord> m_words;
 
 public:
-  void wordCandidates(
-    Mat image,
-    vector<Rect> &res,
-    double min_text_fill = 0.4,
-    double max_text_fill = 0.9,
-    int min_text_height = 8,
-    int min_text_width = 8
-  );
-  void letters(const Mat& wordImage, vector<Mat*> &res, double thresh = 100.0, double m_thresh = 200.0);
+  bool loadImage(String filename);
+  const Mat &image() { return m_image;}
+  const vector<QWord> &words() {return m_words;}
+  void wordCandidates();
+  void letters(QWord &);
 };
-
-void textCandidates(
-  Mat image,
-  vector<Rect> &res,
-  double min_text_fill = 0.4,
-  double max_text_fill = 0.9,
-  int min_text_height = 8,
-  int min_text_width = 8
-);
-
-void textContours(const Mat& image, vector<Mat*> &res, double thresh = 100.0, double m_thresh = 200.0);
