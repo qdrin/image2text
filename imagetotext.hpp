@@ -36,6 +36,6 @@ public:
   bool loadImage(String filename);
   const Mat &image() { return m_image;}
   const vector<QWord> &words() {return m_words;}
-  void wordCandidates();
-  void letters(QWord &);
+  const vector<QWord> &wordCandidates();
+  const vector<QLetter> &letters(QWord &);
 };

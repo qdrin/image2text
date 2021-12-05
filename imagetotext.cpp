@@ -17,7 +17,7 @@ bool QImageToText::loadImage(String filename)
   return ! m_gray.empty();
 }
 
-void QImageToText::wordCandidates()
+const vector<QWord> &QImageToText::wordCandidates()
 {
   Mat grad, imgTh, connected;
   Mat kernel_3x3 = getStructuringElement(MORPH_ELLIPSE, Size(3, 3));
@@ -47,9 +47,10 @@ void QImageToText::wordCandidates()
       m_words.insert(m_words.end(), QWord(rect));
     }
   }
+  return m_words;
 }
 
-void QImageToText::letters(QWord &word)
+const vector<QLetter> &QImageToText::letters(QWord &word)
 {
   int hole; // Номер элемента промежуточного слоя (между родителем и реальными потомками)
   Mat canny_out, imgTmp;
@@ -89,5 +90,6 @@ void QImageToText::letters(QWord &word)
   }
   std::sort(unsorted.begin(), unsorted.end(), &leftOrder);
   for(vector<QLetter>::iterator i=unsorted.begin(); i != unsorted.end(); i++)
-    word.letters.insert(word.letters.end(), *i); 
+    word.letters.insert(word.letters.end(), *i);
+  return word.letters;
 }
