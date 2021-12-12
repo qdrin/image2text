@@ -58,13 +58,14 @@ const vector<Rect> &QImageToText::detectWords()
 bool QImageToText::tessToText()
 {
   m_words.clear();
+  Mat *img = &m_gray;
   tesseract::TessBaseAPI api;
   if (api.Init(NULL, "rus"))
   {
     cout << "could not initialize tesseract with language 'rus'\n";
     return false;
   }
-  api.SetImage(m_gray.data, m_gray.size().width, m_gray.size().height, m_gray.channels(), m_gray.step1());
+  api.SetImage(img->data, img->size().width, img->size().height, img->channels(), img->step1());
   api.Recognize(0);
   tesseract::PageIteratorLevel level = tesseract::RIL_WORD;
   tesseract::ResultIterator* ri = api.GetIterator();

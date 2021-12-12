@@ -43,7 +43,7 @@ int main(int argc, char** argv)
   for(vector<Rect>::iterator i=wordRects.begin(); i != wordRects.end(); i++) {
     rectangle(work.image(), *i, Scalar(0, 255, 0), 1);
   }
-  
+
   wName = "Ерундульки";
   namedWindow(wName);
   imshow(wName, work.image());
