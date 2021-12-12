@@ -50,6 +50,25 @@ const vector<QWord> &QImageToText::wordCandidates()
   return m_words;
 }
 
+string QImageToText::rectToText(Rect r)
+{
+  char *outText;
+  tesseract::TessBaseAPI *api = new tesseract::TessBaseAPI();
+  if(api->Init(NULL, "rus")) {
+    cout << "could not initialize tesseract with language 'rus'\n";
+    return NULL;
+  }
+  PIX *image = pixRead("erundulki.jpg");
+  api->SetImage(image);
+  outText = api->GetUTF8Text();
+  string res = string(outText);
+  api->End();
+  delete api;
+  delete []outText;
+  pixDestroy(&image);
+  return res;
+}
+
 const vector<QLetter> &QImageToText::letters(QWord &word)
 {
   int hole; // Номер элемента промежуточного слоя (между родителем и реальными потомками)

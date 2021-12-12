@@ -25,19 +25,21 @@ int main(int argc, char** argv)
     rectangle(work.image(), i->rect, Scalar(0, 255, 0), 1);
   }
   
-  vector<Mat> wordWindows;
+  string s = work.rectToText(words[0].rect);
+  cout << "Tesseract text: " << s << endl;
   int num = 0;
   for(vector<QWord>::iterator i=words.begin(); i != words.end(); i++, num++) {
-    const vector<QLetter> &wl = work.letters(*i);
-    wName = "word" + to_string(num);
-    cout << num << ": " << wName << ", letters: " << wl.size() << endl;
-    Mat w = Mat::zeros(Size(i->rect.width, i->rect.height), CV_8UC1);
-    wordWindows.insert(wordWindows.end(), w);
-    for(vector<QLetter>::const_iterator l=wl.begin(); l != wl.end(); l++) {
-      l->letter.copyTo(w(l->rect));
-    }
-    namedWindow(wName);
-    imshow(wName, w);
+    cout << "word " << num++ << ": " << i->rect << endl;
+    // const vector<QLetter> &wl = work.letters(*i);
+    // wName = "word" + to_string(num);
+    // cout << num << ": " << wName << ", letters: " << wl.size() << endl;
+    // Mat w = Mat::zeros(Size(i->rect.width, i->rect.height), CV_8UC1);
+    // wordWindows.insert(wordWindows.end(), w);
+    // for(vector<QLetter>::const_iterator l=wl.begin(); l != wl.end(); l++) {
+    //   l->letter.copyTo(w(l->rect));
+    // }
+    // namedWindow(wName);
+    // imshow(wName, w);
   }
   wName = "Ерундульки";
   namedWindow(wName);

@@ -1,4 +1,6 @@
 #include <opencv2/opencv.hpp>
+#include <tesseract/baseapi.h>
+#include <leptonica/allheaders.h>
 
 using namespace cv;
 using namespace std;
@@ -37,5 +39,6 @@ public:
   const Mat &image() { return m_image;}
   const vector<QWord> &words() {return m_words;}
   const vector<QWord> &wordCandidates();
+  string rectToText(Rect r);
   const vector<QLetter> &letters(QWord &);
 };
