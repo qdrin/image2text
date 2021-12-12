@@ -3,6 +3,9 @@
 using namespace cv;
 using namespace std;
 
+// Ptr<text::OCRTesseract> QImageToText::ocr = text::OCRTesseract::create(
+//   NULL, "rus"
+// );
 // Сортировка контуров слева направо
 bool leftOrder(const QLetter a, const QLetter b)
 {
@@ -12,12 +15,13 @@ bool leftOrder(const QLetter a, const QLetter b)
 bool QImageToText::loadImage(String filename)
 {
   m_image = imread(filename.c_str());
-  if(m_image.empty()) return false;
+  if (m_image.empty())
+    return false;
   cvtColor(m_image, m_gray, COLOR_RGB2GRAY);
-  return ! m_gray.empty();
+  return !m_gray.empty();
 }
 
-const vector<QWord> &QImageToText::wordCandidates()
+const vector<Rect> &QImageToText::detectWords()
 {
   Mat grad, imgTh, connected;
   Mat kernel_3x3 = getStructuringElement(MORPH_ELLIPSE, Size(3, 3));
@@ -33,6 +37,7 @@ const vector<QWord> &QImageToText::wordCandidates()
   findContours(connected, contours, hierarchy, RETR_CCOMP, CHAIN_APPROX_SIMPLE);
   Mat drawing = Mat::zeros(imgTh.size(), CV_8UC1);
   Scalar color = Scalar(255, 255, 255);
+  m_wordCandidates.clear();
   for (int idx = 0; idx >= 0; idx = hierarchy[idx][0])
   {
     Rect rect = boundingRect(contours[idx]);
@@ -44,31 +49,68 @@ const vector<QWord> &QImageToText::wordCandidates()
         r > m_config.minTextFillRate && r < m_config.maxTextFillRate &&
         rect.height > m_config.minLetterHeight && rect.width > m_config.minLetterWidth)
     {
-      m_words.insert(m_words.end(), QWord(rect));
+      m_wordCandidates.insert(m_wordCandidates.end(), rect);
     }
   }
-  return m_words;
+  return m_wordCandidates;
 }
 
-string QImageToText::rectToText(Rect r)
+bool QImageToText::tessToText()
 {
-  char *outText;
-  tesseract::TessBaseAPI *api = new tesseract::TessBaseAPI();
-  if(api->Init(NULL, "rus")) {
+  m_words.clear();
+  tesseract::TessBaseAPI api;
+  if (api.Init(NULL, "rus"))
+  {
     cout << "could not initialize tesseract with language 'rus'\n";
-    return NULL;
+    return false;
   }
-  PIX *image = pixRead("erundulki.jpg");
-  api->SetImage(image);
-  outText = api->GetUTF8Text();
-  string res = string(outText);
-  api->End();
-  delete api;
-  delete []outText;
-  pixDestroy(&image);
-  return res;
+  api.SetImage(m_gray.data, m_gray.size().width, m_gray.size().height, m_gray.channels(), m_gray.step1());
+  api.Recognize(0);
+  tesseract::PageIteratorLevel level = tesseract::RIL_WORD;
+  tesseract::ResultIterator* ri = api.GetIterator();
+  for(int i = (ri != 0); i != 0 ; i = ri->Next(level)) {
+    const char* w = ri->GetUTF8Text(level);
+    float confidence = ri->Confidence(level);
+    int x1=0, y1=0, x2=0, y2=0;
+    ri->BoundingBox(level, &x1, &y1, &x2, &y2);
+    Rect r(x1, y1, x2, y2);
+    QWord qw(r, String(w), confidence);
+    m_words.insert(m_words.end(), qw);
+    delete[] w;
+  }
+  api.End();
+  return true;
 }
 
+vector<QWord>::iterator QImageToText::candidateToWord(int i)
+{
+  vector<Rect>::iterator it = m_wordCandidates.begin() + i;
+  return candidateToWord(it);
+}
+
+vector<QWord>::iterator QImageToText::candidateToWord(vector<Rect>::iterator it)
+{
+  Rect r = *it;
+  Mat wimg(m_gray, r);
+  tesseract::TessBaseAPI api;
+  if (api.Init(NULL, "rus"))
+  {
+    cout << "could not initialize tesseract with language 'rus'\n";
+    return vector<QWord>::iterator(NULL);
+  }
+  api.SetImage(wimg.data, wimg.size().width, wimg.size().height, wimg.channels(), wimg.step1());
+  const char* w = api.GetUTF8Text();
+  String res(w);
+  if(res[res.length()-1] == '\n')
+    res.erase(res.length()-1);
+  float conf = api.MeanTextConf();
+  delete[] w;
+  QWord qw(r, res, conf);
+  return m_words.insert(m_words.end(), qw);
+}
+
+
+/*
 const vector<QLetter> &QImageToText::letters(QWord &word)
 {
   int hole; // Номер элемента промежуточного слоя (между родителем и реальными потомками)
@@ -108,7 +150,8 @@ const vector<QLetter> &QImageToText::letters(QWord &word)
     }
   }
   std::sort(unsorted.begin(), unsorted.end(), &leftOrder);
-  for(vector<QLetter>::iterator i=unsorted.begin(); i != unsorted.end(); i++)
+  for (vector<QLetter>::iterator i = unsorted.begin(); i != unsorted.end(); i++)
     word.letters.insert(word.letters.end(), *i);
   return word.letters;
 }
+*/
