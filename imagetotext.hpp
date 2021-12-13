@@ -1,4 +1,8 @@
 #include <opencv2/opencv.hpp>
+//#include <opencv2/text/ocr.hpp>
+#include <tesseract/baseapi.h>
+#include <leptonica/allheaders.h>
+
 
 using namespace cv;
 using namespace std;
@@ -20,9 +24,12 @@ struct QLetter {
 };
 
 struct QWord {
-  QWord(Rect _rect): rect(_rect) {}
+  QWord(Rect _rect): rect(_rect), confidence(0.0) {}
+  QWord(Rect _rect, String _word, float _conf = 0.0): rect(_rect), word(_word), confidence(_conf) {}
+  QWord(): rect(Rect(0,0,0,0)), confidence(0.0) {}
   Rect rect;
-  vector<QLetter> letters;
+  String word;
+  float confidence;
 };
 
 class QImageToText {
@@ -30,12 +37,19 @@ private:
   ConfigParams m_config;
   Mat m_image;
   Mat m_gray;
+  vector<Rect> m_wordCandidates;
   vector<QWord> m_words;
+  // static Ptr<text::OCRTesseract> ocr;
 
 public:
   bool loadImage(String filename);
   const Mat &image() { return m_image;}
   const vector<QWord> &words() {return m_words;}
-  const vector<QWord> &wordCandidates();
-  const vector<QLetter> &letters(QWord &);
+  const vector<Rect> &wordCandidates() {return m_wordCandidates;}
+  const vector<Rect> &detectWords();
+  void clearWords() { m_words.clear(); }
+  vector<QWord>::iterator candidateToWord(vector<Rect>::iterator it);
+  vector<QWord>::iterator candidateToWord(int i);
+  bool tessToText();
+  // const vector<QLetter> &letters(QWord &);
 };

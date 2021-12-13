@@ -11,34 +11,39 @@ using namespace cv;
 int main(int argc, char** argv)
 {
   String filename = "./erundulki.jpg";
-  String wName;
+  cv::String wName;
   QImageToText work;
-
   if(! work.loadImage(filename)) {
     cout << "could not load file " << filename;
     exit(1);
   }
 
-  vector<QWord> words = work.wordCandidates();
+  vector<Rect> wordRects = work.detectWords();
+  for(int i = 0; i < wordRects.size(); i++) {
+    QWord &w = *(work.candidateToWord(i));
+  }
 
-  for(vector<QWord>::iterator i=words.begin(); i != words.end(); i++) {
-    rectangle(work.image(), i->rect, Scalar(0, 255, 0), 1);
+  for(vector<QWord>::const_iterator i=work.words().begin(); i != work.words().end(); i++) {
+    if(i->confidence > 80.0) {
+      cout << "cvword: " << i->word << ", confidence: " << i->confidence << ", rect: " << i->rect << endl;
+    }
   }
   
-  vector<Mat> wordWindows;
-  int num = 0;
-  for(vector<QWord>::iterator i=words.begin(); i != words.end(); i++, num++) {
-    const vector<QLetter> &wl = work.letters(*i);
-    wName = "word" + to_string(num);
-    cout << num << ": " << wName << ", letters: " << wl.size() << endl;
-    Mat w = Mat::zeros(Size(i->rect.width, i->rect.height), CV_8UC1);
-    wordWindows.insert(wordWindows.end(), w);
-    for(vector<QLetter>::const_iterator l=wl.begin(); l != wl.end(); l++) {
-      l->letter.copyTo(w(l->rect));
+  if(work.tessToText()) {
+    vector<QWord> twords = work.words();
+    cout << "Tesseract text:\n";
+    for(vector<QWord>::iterator i=twords.begin(); i != twords.end(); i++) {
+      if(i->confidence > 80.0) {
+        rectangle(work.image(), i->rect, Scalar(0, 0, 255), 1);
+        cout << "tessword: " << i->word << ", confidence: " << i->confidence << ", rect: " << i->rect << endl;
+      }
     }
-    namedWindow(wName);
-    imshow(wName, w);
   }
+
+  for(vector<Rect>::iterator i=wordRects.begin(); i != wordRects.end(); i++) {
+    rectangle(work.image(), *i, Scalar(0, 255, 0), 1);
+  }
+
   wName = "Ерундульки";
   namedWindow(wName);
   imshow(wName, work.image());
