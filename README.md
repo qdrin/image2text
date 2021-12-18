@@ -15,7 +15,7 @@ Install on Windows:
 ## Example using this repo
 
 ### creating QImageToText object from file
-```
+```c++
   #include "imagetotext.hpp"
   using namespace std;
   using namespace cv;
