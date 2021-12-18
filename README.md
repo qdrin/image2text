@@ -1,4 +1,4 @@
-# QImage2Text class. Text words detect and representign them as cv:String's
+# QImage2Text class. Text words detect and representing them as cv:String's
 We are using [OpenCV](https://opencv.org/) library to work with images
 We are using [Tesseract](https://github.com/tesseract-ocr/tesseract) provided with opencv-contrib part of OpenCV 
 ## Necessary dependencies
