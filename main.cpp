@@ -27,6 +27,15 @@ int main(int argc, char** argv)
       cout << "cvword: " << i->word << ", confidence: " << i->confidence << ", rect: " << i->rect << endl;
     }
   }
+
+  // Another form for working with words
+  const vector<QWord> &words = work.words();
+  for(int i=0; i < words.size(); i++) {
+    if(words[i].confidence > minConfidence) {
+      cout << "cvword2: " << words[i].word << ", confidence: " << words[i].confidence << ", rect: " << words[i].rect << endl;
+    }
+  }
+
   // For tessToText method we load image from file (just to test this loading method)
   QImageToText workTess(filename);
   if(workTess.tessToText()) {
