@@ -24,6 +24,7 @@ Install on Windows:
   QImageToText workTess(filename);
 ```
 ### creating QImageToText object from existing cv::Mat
+  ```c++
   #include "imagetotext.hpp"
   using namespace std;
   using namespace cv;
@@ -32,8 +33,9 @@ Install on Windows:
   // Here we make the image not empty
 
   QImageToText work(img);
-
+  ```
 ### Recognise image's words with Tesseract algorithm upon the whole image
+  ```c++
   #include "imagetotext.hpp"
   using namespace std;
   using namespace cv;
@@ -53,8 +55,9 @@ Install on Windows:
       }
     }
   }
-
+  ```
 ### Detecting and recognizing particular words
+  ```c++
   #include "imagetotext.hpp"
   using namespace std;
   using namespace cv;
@@ -86,4 +89,4 @@ Install on Windows:
       cout << "cvword2: " << words[i].word << ", confidence: " << words[i].confidence << ", rect: " << words[i].rect << endl;
     }
   }
-
+  ```
