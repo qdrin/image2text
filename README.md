@@ -3,13 +3,15 @@ We are using [OpenCV](https://opencv.org/) library to work with images
 We are using [Tesseract](https://github.com/tesseract-ocr/tesseract) provided with opencv-contrib part of OpenCV 
 ## Necessary dependencies
 ### opencv: library and opencv-contrib (for Tesseract)
-Install on Ubuntu:
-  - apt install libopencv-contrib4.5
-  - apt install libopencv-core-dev
-  - apt install libopencv-core4.5
-Other Linux distrib's:
+* Install on Ubuntu:
+  -  apt install libopencv-contrib4.5
+  -  apt install libopencv-core-dev
+  -  apt install libopencv-core4.5
+
+* Other Linux distrib's:
   see https://docs.opencv.org/4.x/d7/d9f/tutorial_linux_install.html
-Install on Windows:
+
+* Install on Windows:
   see https://docs.opencv.org/4.x/d3/d52/tutorial_windows_install.html
 
 ## Example using this repo
