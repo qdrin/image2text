@@ -10,13 +10,12 @@ using namespace cv;
 
 int main(int argc, char** argv)
 {
+  float minConfidence = 80.0;
   String filename = "./erundulki.jpg";
+  Mat img;
+  img = imread(filename.c_str());
   cv::String wName;
-  QImageToText work;
-  if(! work.loadImage(filename)) {
-    cout << "could not load file " << filename;
-    exit(1);
-  }
+  QImageToText work(img);
 
   vector<Rect> wordRects = work.detectWords();
   for(int i = 0; i < wordRects.size(); i++) {
@@ -24,16 +23,17 @@ int main(int argc, char** argv)
   }
 
   for(vector<QWord>::const_iterator i=work.words().begin(); i != work.words().end(); i++) {
-    if(i->confidence > 80.0) {
+    if(i->confidence > minConfidence) {
       cout << "cvword: " << i->word << ", confidence: " << i->confidence << ", rect: " << i->rect << endl;
     }
   }
-  
-  if(work.tessToText()) {
-    vector<QWord> twords = work.words();
+  // For tessToText method we load image from file (just to test this loading method)
+  QImageToText workTess(filename);
+  if(workTess.tessToText()) {
+    vector<QWord> twords = workTess.words();
     cout << "Tesseract text:\n";
     for(vector<QWord>::iterator i=twords.begin(); i != twords.end(); i++) {
-      if(i->confidence > 80.0) {
+      if(i->confidence > minConfidence) {
         rectangle(work.image(), i->rect, Scalar(0, 0, 255), 1);
         cout << "tessword: " << i->word << ", confidence: " << i->confidence << ", rect: " << i->rect << endl;
       }

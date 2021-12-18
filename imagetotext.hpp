@@ -35,14 +35,15 @@ struct QWord {
 class QImageToText {
 private:
   ConfigParams m_config;
-  Mat m_image;
+  const Mat m_image;
   Mat m_gray;
   vector<Rect> m_wordCandidates;
   vector<QWord> m_words;
   // static Ptr<text::OCRTesseract> ocr;
 
 public:
-  bool loadImage(String filename);
+  QImageToText(String filename);
+  QImageToText(const Mat &_image);
   const Mat &image() { return m_image;}
   const vector<QWord> &words() {return m_words;}
   const vector<Rect> &wordCandidates() {return m_wordCandidates;}

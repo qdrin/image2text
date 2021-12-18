@@ -3,24 +3,23 @@
 using namespace cv;
 using namespace std;
 
-// Ptr<text::OCRTesseract> QImageToText::ocr = text::OCRTesseract::create(
-//   NULL, "rus"
-// );
-// Сортировка контуров слева направо
-bool leftOrder(const QLetter a, const QLetter b)
+QImageToText::QImageToText(String filename)
+:
+  m_image(imread(filename.c_str()))
 {
-  return a.rect.x < b.rect.x;
+  if (!m_image.empty())
+    cvtColor(m_image, m_gray, COLOR_RGB2GRAY);
 }
 
-bool QImageToText::loadImage(String filename)
+QImageToText::QImageToText(const Mat &_image)
+:
+  m_image(_image)
 {
-  m_image = imread(filename.c_str());
-  if (m_image.empty())
-    return false;
-  cvtColor(m_image, m_gray, COLOR_RGB2GRAY);
-  return !m_gray.empty();
+  if (! m_image.empty())
+    cvtColor(m_image, m_gray, COLOR_RGB2GRAY);
 }
 
+// Detecting borders of words of text
 const vector<Rect> &QImageToText::detectWords()
 {
   Mat grad, imgTh, connected;
@@ -55,6 +54,7 @@ const vector<Rect> &QImageToText::detectWords()
   return m_wordCandidates;
 }
 
+// Text recognition: runs Tesseract OCR all over the image and selects Tesseracts's words next
 bool QImageToText::tessToText()
 {
   m_words.clear();
@@ -83,12 +83,14 @@ bool QImageToText::tessToText()
   return true;
 }
 
+// Text recognition: runs Tesseract OCR on just one word from wordCandidates, pointed by its index in m_words vector
 vector<QWord>::iterator QImageToText::candidateToWord(int i)
 {
   vector<Rect>::iterator it = m_wordCandidates.begin() + i;
   return candidateToWord(it);
 }
 
+// Text recognition: runs Tesseract OCR on just one word from wordCandidates, pointed by m_word iterator
 vector<QWord>::iterator QImageToText::candidateToWord(vector<Rect>::iterator it)
 {
   Rect r = *it;
@@ -109,50 +111,3 @@ vector<QWord>::iterator QImageToText::candidateToWord(vector<Rect>::iterator it)
   QWord qw(r, res, conf);
   return m_words.insert(m_words.end(), qw);
 }
-
-
-/*
-const vector<QLetter> &QImageToText::letters(QWord &word)
-{
-  int hole; // Номер элемента промежуточного слоя (между родителем и реальными потомками)
-  Mat canny_out, imgTmp;
-  Mat kernel_3x3 = getStructuringElement(MORPH_ELLIPSE, Size(3, 3));
-  Scalar color = Scalar(255, 255, 255), backColor = Scalar(0, 0, 0);
-  Mat grayWord = m_gray(word.rect);
-  // GaussianBlur(gray, canny_out, Size(3, 3), 3);
-  blur(grayWord, canny_out, Size(3, 3));
-  Canny(canny_out, canny_out, m_config.minThresh, m_config.maxThresh, m_config.apertureSize, m_config.L2Gradient);
-  vector<vector<Point>> contours;
-  vector<Vec4i> hierarchy;
-  findContours(canny_out, contours, hierarchy, RETR_TREE, CHAIN_APPROX_NONE);
-  vector<Rect> rects;
-  vector<QLetter> unsorted;
-  Mat drawing = Mat::zeros(canny_out.size(), CV_8UC1);
-  Mat d, *cropped;
-  for (int i = 0; i < contours.size(); i++)
-  {
-    if (hierarchy[i][3] == -1)
-    {
-      Rect rect = boundingRect(contours[i]);
-      d = Mat::zeros(m_gray.size(), CV_8UC1);
-      drawContours(d, contours, i, color, FILLED);
-      if ((hole = hierarchy[i][2]) != -1)
-      {
-        for (int j = hierarchy[hole][2]; j != -1; j = hierarchy[j][0])
-        {
-          drawContours(d, contours, j, backColor, FILLED);
-        }
-      }
-      QLetter cropped;
-      cropped.letter = *(new Mat);
-      cropped.rect = rect;
-      d(rect).copyTo(cropped.letter);
-      unsorted.insert(unsorted.end(), cropped);
-    }
-  }
-  std::sort(unsorted.begin(), unsorted.end(), &leftOrder);
-  for (vector<QLetter>::iterator i = unsorted.begin(); i != unsorted.end(); i++)
-    word.letters.insert(word.letters.end(), *i);
-  return word.letters;
-}
-*/
