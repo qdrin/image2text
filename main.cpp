@@ -12,12 +12,10 @@ int main(int argc, char** argv)
 {
   float minConfidence = 80.0;
   String filename = "./erundulki.jpg";
+  Mat img;
+  img = imread(filename.c_str());
   cv::String wName;
-  QImageToText work;
-  if(! work.loadImage(filename)) {
-    cout << "could not load file " << filename;
-    exit(1);
-  }
+  QImageToText work(img);
 
   vector<Rect> wordRects = work.detectWords();
   for(int i = 0; i < wordRects.size(); i++) {
@@ -29,9 +27,10 @@ int main(int argc, char** argv)
       cout << "cvword: " << i->word << ", confidence: " << i->confidence << ", rect: " << i->rect << endl;
     }
   }
-  
-  if(work.tessToText()) {
-    vector<QWord> twords = work.words();
+  // For tessToText method we load image from file (just to test this loading method)
+  QImageToText workTess(filename);
+  if(workTess.tessToText()) {
+    vector<QWord> twords = workTess.words();
     cout << "Tesseract text:\n";
     for(vector<QWord>::iterator i=twords.begin(); i != twords.end(); i++) {
       if(i->confidence > minConfidence) {

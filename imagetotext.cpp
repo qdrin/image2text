@@ -3,13 +3,20 @@
 using namespace cv;
 using namespace std;
 
-bool QImageToText::loadImage(String filename)
+QImageToText::QImageToText(String filename)
+:
+  m_image(imread(filename.c_str()))
 {
-  m_image = imread(filename.c_str());
-  if (m_image.empty())
-    return false;
-  cvtColor(m_image, m_gray, COLOR_RGB2GRAY);
-  return !m_gray.empty();
+  if (!m_image.empty())
+    cvtColor(m_image, m_gray, COLOR_RGB2GRAY);
+}
+
+QImageToText::QImageToText(const Mat &_image)
+:
+  m_image(_image)
+{
+  if (! m_image.empty())
+    cvtColor(m_image, m_gray, COLOR_RGB2GRAY);
 }
 
 // Detecting borders of words of text
