@@ -15,13 +15,14 @@ Install on Windows:
 ## Example using this repo
 
 ### creating QImageToText object from file
+```
   #include "imagetotext.hpp"
   using namespace std;
   using namespace cv;
 
   String filename = "./erundulki.jpg";
   QImageToText workTess(filename);
-
+```
 ### creating QImageToText object from existing cv::Mat
   #include "imagetotext.hpp"
   using namespace std;
